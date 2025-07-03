@@ -49,6 +49,20 @@ CREATE TABLE chef_departement (
     FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
     FOREIGN KEY (departement_id) REFERENCES departement(id)
 );
+CREATE TABLE enseignant (
+    utilisateur_id INT PRIMARY KEY,
+    departement_id INT NOT NULL,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
+    FOREIGN KEY (departement_id) REFERENCES departement(id)
+);
+CREATE TABLE agent (
+    utilisateur_id INT PRIMARY KEY,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+);
+CREATE TABLE directeur (
+    utilisateur_id INT PRIMARY KEY,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+);
 
 -- Insertion de données factices
 INSERT INTO utilisateur (prenom, nom, email, motDePasse) VALUES

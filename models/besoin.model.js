@@ -17,8 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         statut: {
-            type: DataTypes.ENUM('en_attente', 'validé', 'rejeté'),
-            defaultValue: 'en_attente'
+            type: DataTypes.ENUM('EN_ATTENTE', 'VALIDE', 'REJETE'),
+            defaultValue: 'EN_ATTENTE'
         },
         dateSoumission: {
             type: DataTypes.DATE,
@@ -28,12 +28,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'utilisateurs',
+                model: 'Utilisateur',
                 key: 'id'
             }
         }
     }, {
-        tableName: 'besoins'
+        tableName: 'besoin'
     });
 
     return Besoin;

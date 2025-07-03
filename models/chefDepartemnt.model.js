@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
         enseignantId: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'enseignants',
+                model: 'Enseignant',
                 key: 'utilisateurId'
             },
         allowNull: false
@@ -11,15 +11,15 @@ module.exports = (sequelize, DataTypes) => {
         departementId: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'departements',
+                model: 'Departement',
                 key: 'id'
             },
             allowNull: false,
             unique: true // un seul chef de département par département
         }
     }, {
-        tableName: 'chefs_departements',
+        tableName: 'chef_departement',
     });
 
-    return Directeur;
+    return ChefDepartement;
 };

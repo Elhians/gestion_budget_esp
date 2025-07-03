@@ -17,6 +17,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        resetToken: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        resetTokenExpiration: {
+            type: DataTypes.DATE,
+            allowNull: true
+        },
     });
 
     return Utilisateur;

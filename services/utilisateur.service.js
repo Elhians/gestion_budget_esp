@@ -1,4 +1,28 @@
 const { Utilisateur } = require('../models');
+const { Utilisateur } = require('../models');
+const { sendResetPasswordEmail } = require('../utils/email');
+const crypto = require('crypto');
+
+exports.createUtilisateurParAdmin = async (data) => {
+    const exist = await Utilisateur.findOne({ where: { email: data.email } });
+    if (exist) throw new Error("Email déjà utilisé");
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 heures
+
+    const utilisateur = await Utilisateur.create({
+        nom: data.nom,
+        email: data.email,
+        motDePasse: '',
+        resetToken,
+        resetTokenExpiration: expiration
+    });
+
+    await sendResetPasswordEmail(utilisateur.email, resetToken);
+
+    return utilisateur;
+};
+
 
 exports.createUtilisateur = async (data) => {
     if (!data.nom || !data.email || !data.motDePasse) {
@@ -10,6 +34,7 @@ exports.createUtilisateur = async (data) => {
 
     return await Utilisateur.create(data);
 };
+
 
 exports.getAllUtilisateurs = async () => {
     return await Utilisateur.findAll();

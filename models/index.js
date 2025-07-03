@@ -6,7 +6,7 @@ const sequelize = require('../config/database');
 const BesoinModel = require('./besoin.model');
 const UtilisateurModel = require('./utilisateur.model');
 const EnseignantModel = require('./enseignant.model');
-const AgentModel = require('./agents.model');
+const AgentModel = require('./agent.model');
 
 // Initialiser les modèles
 const Besoin = BesoinModel(sequelize, Sequelize.DataTypes);
@@ -21,15 +21,19 @@ sequelize.sync({ alter: true }) // alter ou force: true pour dev
 
 Utilisateur.hasMany(Besoin, {
     foreignKey: 'utilisateurId',
-    as: 'besoins'
+    as: 'besoin'
 });
 
 Besoin.belongsTo(Utilisateur, {
     foreignKey: 'utilisateurId',
     as: 'utilisateur'
 });
-Utilisateur.hasOne(Enseignant, { foreignKey: 'utilisateurId' });
-Enseignant.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });
+Utilisateur.hasOne(Enseignant, { 
+    foreignKey: 'utilisateurId' 
+});
+Enseignant.belongsTo(Utilisateur, {
+    foreignKey: 'utilisateurId' 
+});
 
 Utilisateur.hasOne(Agent, { foreignKey: 'utilisateurId' });
 Agent.belongsTo(Utilisateur, { foreignKey: 'utilisateurId' });

@@ -1,0 +1,32 @@
+{
+  "name": "api_gestion_budget_esp",
+  "version": "1.0.0",
+  "description": "API REST pour la gestion budgétaire de l`ESP",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Elhians/gestion_budget_esp.git"
+  },
+  "keywords": [
+    "express",
+    "budget",
+    "esp",
+    "api",
+    "nodejs"
+  ],
+  "author": "LosTeam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Elhians/gestion_budget_esp/issues"
+  },
+  "homepage": "https://github.com/Elhians/gestion_budget_esp#readme",
+  "dependencies": {
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1",
+    "sequelize": "^6.37.7"
+  }
+}

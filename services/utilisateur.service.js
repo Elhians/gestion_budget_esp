@@ -1,9 +1,8 @@
 const { Utilisateur } = require('../models');
-const { Utilisateur } = require('../models');
 const { sendResetPasswordEmail } = require('../utils/email');
 const crypto = require('crypto');
 
-exports.createUtilisateurParAdmin = async (data) => {
+exports.createUtilisateur = async (data) => {
     const exist = await Utilisateur.findOne({ where: { email: data.email } });
     if (exist) throw new Error("Email déjà utilisé");
 
@@ -11,9 +10,13 @@ exports.createUtilisateurParAdmin = async (data) => {
     const expiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 heures
 
     const utilisateur = await Utilisateur.create({
+        prenom: data.prenom,
         nom: data.nom,
         email: data.email,
         motDePasse: '',
+        role: data.role,
+        idDepartementAppartenance: data.idDepartementAppartenance || null,
+        idDepartementDirection: data.idDepartementDirection || null,
         resetToken,
         resetTokenExpiration: expiration
     });
@@ -23,17 +26,6 @@ exports.createUtilisateurParAdmin = async (data) => {
     return utilisateur;
 };
 
-
-exports.createUtilisateur = async (data) => {
-    if (!data.nom || !data.email || !data.motDePasse) {
-        throw new Error("Champs requis : nom, email, mot de passe");
-    }
-
-    const exist = await Utilisateur.findOne({ where: { email: data.email } });
-    if (exist) throw new Error("Email déjà utilisé");
-
-    return await Utilisateur.create(data);
-};
 
 
 exports.getAllUtilisateurs = async () => {

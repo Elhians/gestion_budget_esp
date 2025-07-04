@@ -9,16 +9,19 @@ exports.login = async ({ email, motDePasse }) => {
     const valid = await bcrypt.compare(motDePasse, utilisateur.motDePasse);
     if (!valid) throw { status: 401, message: "Mot de passe incorrect" };
 
-    const token = jwt.sign({ id: utilisateur.id }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ id: utilisateur.id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION || '2h' });
 
     return {
         message: "Connexion réussie",
         token,
         utilisateur: {
-        id: utilisateur.id,
-        prenom: utilisateur.prenom,
-        nom: utilisateur.nom,
-        email: utilisateur.email
+            id: utilisateur.id,
+            prenom: utilisateur.prenom,
+            nom: utilisateur.nom,
+            email: utilisateur.email,
+            role: utilisateur.role,
+            idDepartementAppartenance: utilisateur.idDepartementAppartenance,
+            idDepartementDirection: utilisateur.idDepartementDirection,
         }
     };
 };

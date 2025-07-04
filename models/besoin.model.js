@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
-    const Besoin = sequelize.define('Besoin', {
+    const Besoin = sequelize.define('besoin', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         titre: {
             type: DataTypes.STRING,
             allowNull: false
@@ -24,11 +29,11 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW
         },
-        utilisateurId: {
+        idAuteur: {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'Utilisateur',
+                model: 'utilisateur',
                 key: 'id'
             }
         }

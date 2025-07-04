@@ -1,17 +1,17 @@
 module.exports = (sequelize, DataTypes) => {
-    const Departement = sequelize.define('Departement', {
+    const Departement = sequelize.define('departement', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         nom: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true
         },
-        code: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        }
     }, {
-        tableName: 'departements'
+        tableName: 'departement'
     });
 
     return Departement;

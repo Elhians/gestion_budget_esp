@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
-    const Utilisateur = sequelize.define('Utilisateur', {
+    const Utilisateur = sequelize.define('utilisateur', {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
         prenom: {
             type: DataTypes.STRING,
             allowNull: false
@@ -17,6 +22,42 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        role: {
+            type: DataTypes.ENUM('DIRECTEUR', 'CHEF_DEPARTEMENT', 'ENSEIGNANT', 'AGENT'),
+            allowNull: false
+        },
+        dateDeCreation: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
+        },
+        dateDeModification: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
+            onUpdate: DataTypes.NOW
+        },
+        
+        // Relation 'appartenir a' (un utilisateur peut appartenir à un département)
+        idDepartementAppartenance: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'departement',
+                key: 'id'
+            }
+        },
+
+        // Relation 'diriger' (un utilisateur peut diriger un département)
+        idDepartementDirection: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            unique: true,
+            references: {
+                model: 'departement',
+                key: 'id'
+            }
+        },
         resetToken: {
             type: DataTypes.STRING,
             allowNull: true
@@ -25,6 +66,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: true
         },
+    },
+    {
+        tableName: 'utilisateur'
     });
 
     return Utilisateur;

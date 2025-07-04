@@ -4,87 +4,84 @@ CREATE DATABASE gestion_budget_esp;
 GRANT ALL PRIVILEGES ON gestion_budget_esp.* TO 'niass'@'localhost';
 USE gestion_budget_esp;
 
--- Table des utilisateurs
-CREATE TABLE utilisateur (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    prenom VARCHAR(50) NOT NULL,
-    nom VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    motDePasse VARCHAR(255)
-);
--- Table des départements
+-- =============================================
+--  Table: departement
+--  Doit être créée en premier car 'utilisateurs' y fait référence.
+-- =============================================
 CREATE TABLE departement (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(255) NOT NULL UNIQUE
 );
 
--- Table des besoins
+-- =============================================
+--  Table: utilisateur
+--  Stocke tous les utilisateurs et leur rôle.
+--  Le rôle est géré par une colonne ENUM basée sur EnumRole.
+-- =============================================
+CREATE TABLE utilisateur (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    prenom VARCHAR(255) NOT NULL,
+    nom VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    mot_de_passe VARCHAR(255) NOT NULL, -- Doit stocker un mot de passe haché
+    role ENUM('DIRECTEUR', 'CHEF_DEPARTEMENT', 'ENSEIGNANT', 'AGENT') NOT NULL,
+    -- Date de création et de modification pour le suivi
+    -- Ces champs sont automatiquement gérés par la base de données
+    -- date_creation est initialisé à l'heure actuelle lors de l'insertion
+    -- date_modification est mis à jour à chaque modification de l'enregistrement
+    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_modification DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    reset_token VARCHAR(255) NULL, -- Pour la réinitialisation du mot de passe
+    reset_token_expiration DATETIME NULL, -- Pour la réinitialisation du mot de passe
+    -- Relation 'appartenir a' (un utilisateur peut appartenir à un département)
+    id_departement_appartenance INT NULL,
+    
+    -- Relation 'diriger' (un utilisateur peut diriger un département)
+    id_departement_direction INT NULL UNIQUE, -- UNIQUE pour garantir qu'un chef ne dirige qu'un seul département
+
+    FOREIGN KEY (id_departement_appartenance) REFERENCES departement(id) ON DELETE SET NULL,
+    FOREIGN KEY (id_departement_direction) REFERENCES departement(id) ON DELETE SET NULL
+);
+
+-- =============================================
+--  Table: besoin
+--  Contient toutes les demandes soumises par les utilisateurs.
+-- =============================================
 CREATE TABLE besoin (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    titre VARCHAR(100) NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    titre VARCHAR(255) NOT NULL,
     description TEXT,
-    cout DECIMAL(10,2),
-    statut ENUM('VALIDE', 'EN_ATTENTE', 'REJETTE') DEFAULT 'EN_ATTENTE',
-    dateSoumission DATETIME NOT NULL,
-    dateModification DATETIME NOT NULL,
-    categorie VARCHAR(255) NOT NULL
-    utilisateur_id INT,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
+    categorie VARCHAR(255),
+    cout DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    statut ENUM('VALIDE', 'EN_ATTENTE', 'REJETTE') NOT NULL DEFAULT 'EN_ATTENTE',
+    date_soumission DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Le lien vers l'utilisateur qui a "exprimé" le besoin
+    id_auteur INT NOT NULL,
+    FOREIGN KEY (id_auteur) REFERENCES utilisateur(id) ON DELETE CASCADE
 );
 
--- Table des validations
+-- =============================================
+--  Table: validation (Implémentation de la Classe d'Association)
+--  Lie un 'Utilisateur' et un 'Besoin' et contient les détails de la validation.
+-- =============================================
 CREATE TABLE validation (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    besoin_id INT,
-    source VARCHAR(100),
-    statut ENUM('VALIDE', 'EN_ATTENTE', 'REJETTE'),
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    
+    -- Clés étrangères formant l'association
+    id_besoin INT NOT NULL,
+    id_validateur INT NOT NULL,
+    
+    -- Attributs de la classe d'association
+    source ENUM('DIRECTEUR', 'CHEF_DEPARTEMENT', 'ENSEIGNANT', 'AGENT') NOT NULL,
+    statut ENUM('VALIDE', 'EN_ATTENTE', 'REJETTE') NOT NULL,
     commentaire TEXT,
-    FOREIGN KEY (besoin_id) REFERENCES besoin(id)
+    date_validation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Définition des clés étrangères
+    FOREIGN KEY (id_besoin) REFERENCES besoin(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_validateur) REFERENCES utilisateur(id) ON DELETE CASCADE,
+    
+    -- Contrainte pour s'assurer qu'un utilisateur ne valide un besoin qu'une seule fois
+    UNIQUE (id_besoin, id_validateur)
 );
-
--- Table de liaison utilisateur <-> département (1 utilisateur dirige 1 département)
-CREATE TABLE chef_departement (
-    utilisateur_id INT PRIMARY KEY,
-    departement_id INT NOT NULL,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
-    FOREIGN KEY (departement_id) REFERENCES departement(id)
-);
-CREATE TABLE enseignant (
-    utilisateur_id INT PRIMARY KEY,
-    departement_id INT NOT NULL,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id),
-    FOREIGN KEY (departement_id) REFERENCES departement(id)
-);
-CREATE TABLE agent (
-    utilisateur_id INT PRIMARY KEY,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
-);
-CREATE TABLE directeur (
-    utilisateur_id INT PRIMARY KEY,
-    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id)
-);
-
--- Insertion de données factices
-INSERT INTO utilisateur (prenom, nom, email, motDePasse) VALUES
-('Alioune', 'Diop', 'adiop@esp.sn', 'hashedpass1'),
-('Mame', 'Faye', 'mfaye@esp.sn', 'hashedpass2'),
-('Fatou', 'Sarr', 'fsarr@esp.sn', 'hashedpass3'),
-('Ibrahima', 'Ndiaye', 'ind@esp.sn', 'hashedpass4');
-
-INSERT INTO departement (nom) VALUES
-('Informatique'),
-('Génie Civil');
-
-INSERT INTO chef_departement (utilisateur_id, departement_id) VALUES
-(3, 1); -- Fatou Sarr est chef du département Informatique
-
-INSERT INTO besoin (titre, description, cout, statut, dateSoumission, dateModification, utilisateur_id) VALUES
-('Achat projecteur', 'Besoin pour les cours en amphi', 250000, 'EN_ATTENTE', NOW(), NOW(), 1),
-('Maintenance réseau', 'Intervention urgente', 150000, 'EN_ATTENTE', NOW(), NOW(), 2),
-('Licence logiciel', 'Abonnement annuel', 300000, 'VALIDE', NOW(), NOW(), 3),
-('Achat mobilier', 'Tables et chaises pour salle 203', 500000, 'REJETTE', NOW(), NOW(), 1);
-
-INSERT INTO validation (besoin_id, source, statut, commentaire) VALUES
-(1, 'Chef de département', 'EN_ATTENTE', 'En cours d’analyse'),
-(3, 'Direction', 'VALIDE', 'Prioritaire pour l’année en cours'),
-(4, 'Chef de département', 'REJETTE', 'Budget insuffisant');

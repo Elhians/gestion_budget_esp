@@ -4,7 +4,7 @@ exports.createBesoin = async (data) => {
     if (!data.titre || !data.cout) {
         throw new Error("Le titre et le coût sont requis.");
     }
-    data.statut = data.statut || 'en_attente';
+    data.statut = data.statut || 'EN_ATTENTE';
     return await Besoin.create(data);
 };
 
